@@ -49,7 +49,27 @@ function getCurrentSpotifyTrack(spotifyConfig) {
 function setSlackStatusToCurrentTrack(config) {
   return getCurrentSpotifyTrack(config.spotify)
     .then(response => {
-      console.log(JSON.stringify(response.body.item.name, null, 2));
+      const name = response.body.item.name;
+      let artists = '';
+      if (response.body.item.artists) {
+        response.body.item.artists.forEach(artist => {
+          if (artists.length) {
+            artists += ', ';
+          }
+
+          artists += artist.name;
+        });
+      }
+
+      let status;
+      if (artists) {
+        status = `${name} - ${artists}`;
+      } else {
+        status = `${name}`;
+      }
+
+      console.log('Listening to ' + status);
+      return setSlackStatus(status, ':spotify:', config.slack.legacyApiToken);
     });
 }
 
