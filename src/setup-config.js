@@ -4,7 +4,7 @@ const open = require('open');
 const SpotifyWebApi = require('spotify-web-api-node');
 
 const configPath = './config.json';
-const spotifyScopes = ['user-read-currently-playing'];
+const spotifyScopes = ['user-read-playback-state'];
 const initialSchema = {
   properties: {
     slackApiToken: {
@@ -118,4 +118,29 @@ function getConfig() {
   });
 }
 
-module.exports = getConfig;
+function updateSpotifyAccessToken(newAccessToken) {
+  return new Promise((resolve, reject) => {
+    getConfig()
+      .then(config => {
+        config.spotify = config.spotify || {};
+        config.spotify.accessToken = newAccessToken;
+
+        const configJson = JSON.stringify(config, null, 2);
+        // Write config
+        fs.writeFile(configPath, configJson, err => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          // Resolve with new config object
+          resolve(config);
+        });
+      })
+  });
+}
+
+module.exports = {
+  getConfig,
+  updateSpotifyAccessToken,
+};

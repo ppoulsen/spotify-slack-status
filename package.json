@@ -10,6 +10,7 @@
     "@slack/client": "3.10.0",
     "open": "0.0.5",
     "prompt": "1.0.0",
+    "requests": "0.1.7",
     "spotify-web-api-node": "2.4.0"
   }
 }
