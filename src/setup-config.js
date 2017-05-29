@@ -1,10 +1,21 @@
+/**
+ * Functions to get/initialize config and update Spotify access tokens after
+ * refresh.
+ * @module set-status-to-current-track
+ */
 const fs = require('fs');
+const path = require('path');
 const prompt = require('prompt');
 const open = require('open');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-const configPath = './config.json';
+// Path to config file
+const configPath = path.resolve(__dirname, '..', 'config.json');
+
+// Spotify API Scope(s)
 const spotifyScopes = ['user-read-playback-state'];
+
+// Initial schema for prompt
 const initialSchema = {
   properties: {
     slackApiToken: {
@@ -21,6 +32,9 @@ const initialSchema = {
     },
   },
 };
+
+// Follow-up schema for Spotify Access code after browser has been opened and
+// permissions granted
 const accessCodeSchema = {
   properties: {
     accessCode: {
@@ -30,6 +44,14 @@ const accessCodeSchema = {
   },
 };
 
+/**
+ * @function getExistingConfig - Retrieves the existing config file. This is a
+ *                               helper for the getConfig function, hence the
+ *                               awkward passing-in of resolve and reject.
+ *
+ * @param  resolve getConfig resolve
+ * @param  reject  getConig reject
+ */
 function getExistingConfig(resolve, reject) {
   fs.readFile(configPath, 'utf8', (err, data) => {
     if (err) {
@@ -42,6 +64,15 @@ function getExistingConfig(resolve, reject) {
   });
 }
 
+/**
+ * @function createNewConfig - Creates new config file. This is a helper for
+ *                             the getConfig function, hence the awkward
+ *                             passing-in of resolve and reject.
+ *
+ * @param  {type} resolve getConfig resolve
+ * @param  {type} reject  getConfig reject
+ * @param  {type} fd      Config file descriptor
+ */
 function createNewConfig(resolve, reject, fd) {
   // Initialize prompt
   prompt.colors = false;
@@ -55,7 +86,7 @@ function createNewConfig(resolve, reject, fd) {
     const { spotifyClientId, spotifyClientSecret } = result;
     const spotifyApi = new SpotifyWebApi({
       // Codepen that writes the Access Code to document
-      redirectUri: 'https://codepen.io/anon/pen/OmYRRz',
+      redirectUri: 'https://codepen.io/ppoulsen/pen/OmYRRz',
       clientId: spotifyClientId,
       clientSecret: spotifyClientSecret,
     });
@@ -103,8 +134,12 @@ function createNewConfig(resolve, reject, fd) {
   });
 }
 
-// This gets the existing config if present or else prompts the user to create
-// a new config.
+/**
+ * @function getConfig - This gets the existing config if present or else
+ *                       prompts the user to create a new config.
+ *
+ * @return Promise which resolves with config object
+ */
 function getConfig() {
   return new Promise((resolve, reject) => {
     fs.open(configPath, 'wx', (err, fd) => {
@@ -118,6 +153,13 @@ function getConfig() {
   });
 }
 
+/**
+ * @function updateSpotifyAccessToken - Updates the Spotify access token in the
+ *                                      config file.
+ *
+ * @param  newAccessToken New Spotify access token after refresh
+ * @return                Promise that resolves with the new config object
+ */
 function updateSpotifyAccessToken(newAccessToken) {
   return new Promise((resolve, reject) => {
     getConfig()

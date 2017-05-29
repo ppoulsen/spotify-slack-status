@@ -1,7 +1,22 @@
+/**
+ * Function to set Slack status to current Spotify track.
+ * @module set-status-to-current-track
+ */
+
 const SpotifyWebApi = require('spotify-web-api-node');
 const request = require('request');
 const { updateSpotifyAccessToken } = require('./setup-config');
 
+
+/**
+ * @function setSlackStatus - Sets Slack status for given access token
+ *
+ * @param  statusText  Slack status text (appears on hover and in DMs)
+ * @param  statusEmoji Slack status emoji (appears next to name)
+ *                     needs to be wrapped in colons like ":spotify:"
+ * @param  accessToken Slack legacy API token for user
+ * @return             Promise for network request
+ */
 function setSlackStatus(statusText, statusEmoji, accessToken) {
   return new Promise((resolve, reject) => {
     const profile = {
@@ -16,14 +31,24 @@ function setSlackStatus(statusText, statusEmoji, accessToken) {
       url: fullUrl,
     }, (error, response, body) => {
       if (error || response.statusCode >= 400) {
-        reject();
+        reject(error || new Error('Failed to set Slack status'));
       } else {
-        resolve();
+        resolve(statusText);
       }
     });
   });
 }
 
+/**
+ * @function getCurrentSpotifyTrack - Refreshes Spotify Authorization token,
+ *                                    updates the config file, and returns
+ *                                    current player request
+ *
+ * @param    spotifyConfig Config object containing accessToken, clientId,
+ *                         clientSecret, and refreshToken
+ * @return                 Promise that resolves with current playback state
+ *                         response
+ */
 function getCurrentSpotifyTrack(spotifyConfig) {
   const spotifyApi = new SpotifyWebApi({
     accessToken: spotifyConfig.accessToken,
@@ -46,6 +71,12 @@ function getCurrentSpotifyTrack(spotifyConfig) {
     });
 }
 
+/**
+ * @function setSlackStatusToCurrentTrack - Sets Slack status to current track
+ *
+ * @param  config Configuration object for project
+ * @return        description
+ */
 function setSlackStatusToCurrentTrack(config) {
   return getCurrentSpotifyTrack(config.spotify)
     .then(response => {
@@ -68,7 +99,6 @@ function setSlackStatusToCurrentTrack(config) {
         status = `${name}`;
       }
 
-      console.log('Listening to ' + status);
       return setSlackStatus(status, ':spotify:', config.slack.legacyApiToken);
     });
 }
