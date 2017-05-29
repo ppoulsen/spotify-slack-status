@@ -15,7 +15,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@slack/client": "3.10.0",
     "open": "0.0.5",
     "prompt": "1.0.0",
     "requests": "0.1.7",
