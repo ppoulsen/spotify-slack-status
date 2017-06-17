@@ -2,7 +2,11 @@
   "name": "spotify-slack-status",
   "version": "1.0.0",
   "description": "Set Slack status to current Spotify track",
-  "keywords": ["slack", "spotify", "status"],
+  "keywords": [
+    "slack",
+    "spotify",
+    "status"
+  ],
   "main": "index.js",
   "repository": "https://github.com/ppoulsen/slack-spotify-status.git",
   "author": "Paul Poulsen <ppoulsen21@gmail.com>",
@@ -15,9 +19,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "colors": "1.1.2",
     "open": "0.0.5",
     "prompt": "1.0.0",
-    "requests": "0.1.7",
+    "request": "2.81.0",
     "spotify-web-api-node": "2.4.0"
   }
 }

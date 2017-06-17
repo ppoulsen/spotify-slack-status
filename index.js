@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 
 const { getConfig } = require('./src/setup-config');
-const setSlackStatusToCurrentTrack = require('./src/set-status-to-current-track');
+const setSlackStatusToCurrentTrack = require('./src/slack-status').setSlackStatusToCurrentTrack;
+const setupEventListeners = require('./src/keyboard-events').setupEventListeners;
+const colors = require('colors');
+
+colors.setTheme({
+  song: 'rainbow',
+  message: 'green',
+})
 
 let stopProgram = false;
 let timeoutId = null;
 let timeoutResolve = null;
 
 // Cancel timeouts and immediately resolve outstanding Promise
-process.on('SIGINT', () => {
+function exit() {
   stopProgram = true;
   if (timeoutId) {
     clearTimeout(timeoutId);
@@ -17,7 +24,9 @@ process.on('SIGINT', () => {
   if (timeoutResolve) {
     timeoutResolve();
   }
-});
+
+  process.exit(0);
+}
 
 /**
  * @function setStatusIfStillRunning - If app hasn't been stopped, continue
@@ -37,7 +46,7 @@ function setStatusIfStillRunning(config) {
     timeoutResolve = resolve;
     setSlackStatusToCurrentTrack(config)
       .then(newStatus => {
-        console.log(newStatus);
+        console.log(newStatus.song);
         if (stopProgram) {
           return;
         }
@@ -53,6 +62,8 @@ function setStatusIfStillRunning(config) {
 
 // Get config (initializing for first time setup)
 getConfig()
+  // Setup keyboard event listeners when STDIN is a TTY
+  .then(setupEventListeners.bind(null, exit))
   // Set status if still running
   .then(setStatusIfStillRunning)
   // Log error on exception and exit app

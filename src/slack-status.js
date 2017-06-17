@@ -1,6 +1,6 @@
 /**
- * Function to set Slack status to current Spotify track.
- * @module set-status-to-current-track
+ * Module to set/clear Slack status
+ * @module slack-status
  */
 
 const SpotifyWebApi = require('spotify-web-api-node');
@@ -37,6 +37,17 @@ function setSlackStatus(statusText, statusEmoji, accessToken) {
       }
     });
   });
+}
+
+/**
+ * @function clearSlackStatus - Clears Slack status for given access token
+ *
+ * @param  accessToken Slack legacy API token for user
+ * @return             Promise for network request
+ */
+function clearSlackStatus(accessToken) {
+  // To clear Slack status, set the status text and status emoji to empty strings
+  return setSlackStatus('', '', accessToken);
 }
 
 /**
@@ -103,4 +114,7 @@ function setSlackStatusToCurrentTrack(config) {
     });
 }
 
-module.exports = setSlackStatusToCurrentTrack;
+module.exports = {
+  clearSlackStatus,
+  setSlackStatusToCurrentTrack,
+};
